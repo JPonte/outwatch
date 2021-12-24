@@ -4,14 +4,11 @@ import Options._
 inThisBuild(Seq(
   organization := "io.github.outwatch",
 
+  crossScalaVersions := Seq("2.12.15", "2.13.6", "3.1.1-RC1"),
   scalaVersion := crossScalaVersions.value.last,
 
-  crossScalaVersions := Seq("2.12.15", "2.13.7"),
-
   licenses += ("Apache 2", url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
-
   homepage := Some(url("https://outwatch.github.io/")),
-
   scmInfo := Some(ScmInfo(
     url("https://github.com/OutWatch/outwatch"),
     "scm:git:git@github.com:OutWatch/outwatch.git",
@@ -42,15 +39,15 @@ val jsdomVersion = "13.2.0"
 val silencerVersion = "1.7.7"
 val colibriVersion = "0.2.2"
 
-lazy val commonSettings = Seq(
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
-  addCompilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
+val isDotty = Def.setting(
+  CrossVersion.partialVersion(scalaVersion.value).exists(_._1 == 3)
+)
 
+lazy val commonSettings = Seq(
   useYarn := true,
 
   libraryDependencies ++= Seq(
     "org.scalatest" %%% "scalatest" % "3.2.10" % Test,
-    "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full,
   ),
 
   scalacOptions ++= CrossVersion.partialVersion(scalaVersion.value).map(v =>
@@ -58,6 +55,17 @@ lazy val commonSettings = Seq(
   ).getOrElse(Nil),
   Compile / console / scalacOptions ~= (_.diff(badConsoleFlags)),
   Test / scalacOptions --= Seq("-Xfatal-warnings"), // allow usage of deprecated calls in tests
+
+  scalacOptions ++= (if (isDotty.value) Seq("-Ykind-projector")
+  else
+    Seq()),
+
+  libraryDependencies ++= (if (isDotty.value) Nil
+  else
+    Seq(
+      compilerPlugin(("org.typelevel" %% "kind-projector" % "0.13.2").cross(CrossVersion.full))
+      ))
+
 )
 
 lazy val outwatchReactive = project
@@ -70,7 +78,7 @@ lazy val outwatchReactive = project
 
     libraryDependencies ++= Seq(
       "com.github.cornerman" %%% "colibri" % colibriVersion,
-    )
+    ),
   )
 
 lazy val outwatchUtil = project
@@ -94,8 +102,7 @@ lazy val outwatchMonix = project
 
     libraryDependencies ++= Seq(
       "com.github.cornerman" %%% "colibri-monix" % colibriVersion,
-      "io.monix"      %%% "monix"       % "3.4.0",
-    )
+    ),
   )
 
 lazy val outwatchRepairDom = project
@@ -184,7 +191,7 @@ lazy val jsdocs = project
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "2.1.0",
       "com.github.cornerman" %%% "colibri-monix" % colibriVersion,
-      "com.github.cornerman" %%% "colibri-rx" % colibriVersion,
+      /* "com.github.cornerman" %%% "colibri-rx" % colibriVersion, */
     ),
     Compile / npmDependencies ++= Seq(
       "js-beautify" -> "1.14.0"
@@ -196,7 +203,7 @@ lazy val docs = project
   .enablePlugins(MdocPlugin, DocusaurusPlugin)
   .settings(
     test/skip := true,
-    publish/skip := true,
+    publish/skip  := true,
     moduleName := "outwatch-docs",
     mdocJS := Some(jsdocs),
     mdocJSLibraries := (jsdocs / Compile / fullOptJS / webpack).value,
@@ -213,6 +220,7 @@ lazy val docs = project
         // scala-steward:off
         case "2.12" => "org.scala-js" %% "scalajs-compiler" % scalaJSVersion cross CrossVersion.constant("2.12.15")
         case "2.13" => "org.scala-js" %% "scalajs-compiler" % scalaJSVersion cross CrossVersion.constant("2.13.6")
+        case "3"    => "org.scala-js" %% "scalajs-compiler" % scalaJSVersion cross CrossVersion.constant("3.1.1-RC1")
         // scala-steward:on
       }
     }
