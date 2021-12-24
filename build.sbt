@@ -78,7 +78,7 @@ lazy val outwatchReactive = project
 
     libraryDependencies ++= Seq(
       "com.github.cornerman" %%% "colibri" % colibriVersion,
-    ),
+    )
   )
 
 lazy val outwatchUtil = project
@@ -102,7 +102,7 @@ lazy val outwatchMonix = project
 
     libraryDependencies ++= Seq(
       "com.github.cornerman" %%% "colibri-monix" % colibriVersion,
-    ),
+    )
   )
 
 lazy val outwatchRepairDom = project
