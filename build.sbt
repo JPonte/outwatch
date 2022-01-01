@@ -169,7 +169,7 @@ lazy val bench = project
       Nil,
 
     libraryDependencies ++=
-      "com.github.fdietze.bench" %%% "bench" % "5ffab44" ::
+      "com.github.fdietze.bench" %%% "bench" % "d411db1" ::
       Nil,
 
     Compile/scalaJSStage := FullOptStage,
