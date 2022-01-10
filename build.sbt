@@ -4,8 +4,8 @@ import Options._
 inThisBuild(Seq(
   organization := "io.github.outwatch",
 
-  crossScalaVersions := Seq("2.12.15", "2.13.6", "3.1.1-RC1"),
   scalaVersion := crossScalaVersions.value.last,
+  crossScalaVersions := Seq("2.12.15", "2.13.6", "3.1.1-RC1"),
 
   licenses += ("Apache 2", url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   homepage := Some(url("https://outwatch.github.io/")),
